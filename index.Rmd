@@ -44,21 +44,33 @@ testing <- read.csv('pml-testing.csv', header=T, na.strings=c('NA', '#DIV/0!'))
 
 In reading the data I have treated '#DIV/0!' as an additional NA string. Many (~100) of the predictor
 variables are majority (>97%) filled with NAs. Processing the training data to remove these columns
-makes for an easier analysis.
+makes for an easier analysis. Additionally, the first 7 columns are removed, since they lack
+useful data.
 
 ```{r}
 training2 <- training[,!apply(is.na(training), 2, any)]
+training2 <- training2[,-(1:7)]
+testing  <- testing [,-(1:7)]
 ```
 
+Then the correlations between predictors are examined, and those with a high correlattion
+(>0.8) are removed from the model
+
+```{r}
+library(caret)
+mdlcorr <- cor(training2[,1:52])
+corrVector <- findCorrelation(mdlcorr, cutoff=0.75)
+training2 <- training2[,-corrVector]
+```
 
 In order to develop an accurate model, I have used repeated k-fold cross validation, with
-10 folds and 3 repeats. THis is combined with a random forest method, chosen for it's high accuracy.
+10 folds and 3 repeats. This is combined with a random forest method, chosen for it's high accuracy.
 The speed of this analysis is slower than perhaps would be ideal, but was sufficient for the 
 analysis.
 
 ```{r, cache=T}
-library(caret)
-
+library(doParallel)
+registerDoParallel()
 ## 10-fold CV, repeated three times
 fitControl <- trainControl(method = "repeatedcv",number = 10,repeats = 3)
 set.seed(2305)
@@ -66,8 +78,8 @@ classeMdl <- train(classe~., data=training2, method='rf', trControl=fitControl)
 classeMdl$finalModel
 predclasse <- predict(classeMdl, training2)
 confusionMatrix(predclasse, training2$classe)
-
 ```
-Based on the reported accuracy (1) and OOB error estimate (0.01%), I would estimate the 
+
+Based on the reported accuracy (1) and OOB error estimate (0.51%), I would estimate the 
 out of sample error is < 1%. I am somewhat concerned that this model may have overfit the
 data given the high accuracy, in which case the error on the test set may be higher.

@@ -139,25 +139,29 @@ $(document).ready(function () {
 </div>
 <div id="analysis" class="section level3">
 <h3>Analysis</h3>
-<p>In reading the data I have treated ‘#DIV/0!’ as an additional NA string. Many (~100) of the predictor variables are majority (&gt;97%) filled with NAs. Processing the training data to remove these columns makes for an easier analysis.</p>
-<p>In order to develop an accurate model, I have used repeated k-fold cross validation, with 10 folds and 3 repeats. THis is combined with a random forest method, chosen for it’s high accuracy. The speed of this analysis is slower than perhaps would be ideal, but was sufficient for the analysis.</p>
+<p>In reading the data I have treated ‘#DIV/0!’ as an additional NA string. Many (~100) of the predictor variables are majority (&gt;97%) filled with NAs. Processing the training data to remove these columns makes for an easier analysis. Additionally, the first 7 columns are removed, since they lack useful data.</p>
+<p>Then the correlations between predictors are examined, and those with a high correlattion (&gt;0.8) are removed from the model</p>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
+<p>In order to develop an accurate model, I have used repeated k-fold cross validation, with 10 folds and 3 repeats. This is combined with a random forest method, chosen for it’s high accuracy. The speed of this analysis is slower than perhaps would be ideal, but was sufficient for the analysis.</p>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loading required package: iterators</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
 <pre><code>## 
 ## Call:
 ##  randomForest(x = x, y = y, mtry = param$mtry) 
 ##                Type of random forest: classification
 ##                      Number of trees: 500
-## No. of variables tried at each split: 41
+## No. of variables tried at each split: 2
 ## 
-##         OOB estimate of  error rate: 0.01%
+##         OOB estimate of  error rate: 0.51%
 ## Confusion matrix:
 ##      A    B    C    D    E  class.error
-## A 5580    0    0    0    0 0.0000000000
-## B    1 3796    0    0    0 0.0002633658
-## C    0    1 3421    0    0 0.0002922268
-## D    0    0    0 3216    0 0.0000000000
-## E    0    0    0    0 3607 0.0000000000</code></pre>
+## A 5578    2    0    0    0 0.0003584229
+## B   15 3773    9    0    0 0.0063207796
+## C    0   18 3394   10    0 0.0081823495
+## D    0    0   38 3176    2 0.0124378109
+## E    0    0    2    5 3600 0.0019406709</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
